@@ -121,10 +121,13 @@ from [order details] od left join
 
 
 ---18 List city names which have more than 2 customers, and number of customers in that city
-    select distinct City, count(CustomerID) AS NumberOfCustomer
-	from Customers
-	where customerID in( select City
-	from
+    select distinct c.City, count(c.CustomerID) AS NumberOfCustomer
+	From Customers c left join
+	orders o on o.customerID=c.customerID
+	WHERE O.customerID>2
+	Group by c.city
+
+ 
 
 	--19List the names of customers who placed orders after 1/1/98 with order date
 	select c.ContactName, o.orderdate
@@ -140,10 +143,58 @@ from [order details] od left join
 
 
 	--21.. Display the names of all customers  along with the  count of products they bought
-	select c.contactname, count(distinct ProductID)
+	select c.contactname, count(od.quantity)
 	from customers c left join
 	[orders] o on o.customerID=c.customerID
 	JOIN [Order Details] od on o.orderID=od.orderID
-	JOIN Proudcts p on p.productID = od.orderID
+	JOIN Products p on p.productID = od.orderID
+	group by c.contactName
 
---
+
+--22.Display the customer ids who bought more than 100 Products with count of products.
+select c.customerID, count(p.ProductID) AS TotalCount
+	from customers c left join
+	[orders] o on o.customerID=c.customerID
+	JOIN [Order Details] od on o.orderID=od.orderID
+	JOIN Products p on p.productID = od.productID
+	where od.quantity> 100
+	Group by c.customerID
+
+
+--23.   List all of the possible ways that suppliers can ship their products. Display the results as below
+--Supplier Company Name                Shipping Company Name
+
+Select si.CompanyName
+From Shippers si
+ Union
+ Select su.CompanyName 
+ From Suppliers su
+
+ 
+ --24. Display the products order each day. Show Order date and Product Name.
+ select o.orderdate, p.productName
+ from orders o left join
+[order details] od on o.orderID=od.orderID
+JOIN Products p on p.productID=od.productID
+GROUP BY o.orderdate, p.productname
+
+--25. .  Displays pairs of employees who have the same job title
+select e.firstname, e.lastname 
+from employees e
+group by e.firstname, e.lastname 
+having count(title)>1
+
+---26. Display all the Managers who have more than 2 employees reporting to them.
+Select e.EmployeeID, e.FirstName + ' ' + e.LastName, e.ReportsTo, m.EmployeeID, m.FirstName + ' ' + m.LastName as [Manager Name]
+From Employees e Join Employees m
+On e.ReportsTo = m.EmployeeID
+
+--27.Display the customers and suppliers by city. The results should have the following columns
+-- city name contact name type (Customer or Supplier)
+
+Select c.city as Cityname, c.contactname as contactname
+from customers c
+union
+select s.city as Cityname ,s.contactname as contactname 
+from suppliers s
+
