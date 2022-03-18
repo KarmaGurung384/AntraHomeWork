@@ -69,19 +69,22 @@ from orders o)
 
 
 
---6.      List all Customer Cities that have ordered at least two different kinds of products.
-
-select distinct c.city 
-from Customers c
-where city IN (Select e.city 
-from employees e left join
-orders o on o.EmployeeID=e.EmployeeID
-join [Order Details] od on o.OrderID=od.OrderID
-where = 0)
+--6.List all Customer Cities that have ordered at least two different kinds of products.
 
 
+select c.city, count(p.category)
+from products p left join orderdetails od
+on p.productID=od.productID
+JOIN ORDERS O ON od.orderID=O.orderid
+join customers c on c.customerID=O.customerID
+group by c.city, p.category 
 
---7.      List all Customers who have ordered products, but have the ‘ship city’ on the order different from their own customer cities.
+
+
+
+
+
+--7. List all Customers who have ordered products, but have the ‘ship city’ on the order different from their own customer cities.
 
  select p.productName, AVG(od.quantity), c.City, Rank() over(partition by p.productName order by o.shipcity) as [rank]
  from Customers c right join orders o on o.customerID = C.customerID
@@ -136,21 +139,13 @@ where od.Quantity=0
 
 --10.  List one city, if exists, that is the city from where the employee sold most orders (not the product quantity) is, and also the city of most total quantity of products ordered from. (tip: join  sub-query)
 
-select distinct c.city 
+select  c.city 
 from Customers c
-where city IN (Select e.city 
+where city IN (Select e.city, MAX(od.quantity)
 from employees e left join
 orders o on o.EmployeeID=e.EmployeeID
 join [Order Details] od on o.OrderID=od.OrderID
-where od.Quantity MAX (select distinct c.city 
-from Customers c
-where city IN (Select e.city 
-from employees e left join
-orders o on o.EmployeeID=e.EmployeeID
-join [Order Details] od on o.OrderID=od.OrderID
-where od.Quantity=0)
-
-
+group by e.city)
 
 
 --11. How do you remove the duplicates record of a table?
